@@ -14,9 +14,10 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Run Markdown Syntax Lint
-      uses: DavidAnson/github-workflow-markdownlint@v1
+      uses: nosborn/github-action-markdown-cli@v3.3.0
       with:
-        config: '.github/config/.markdownlint.json'
+        files: .
+        config_file: '.github/config/.markdownlint.json'
 
   # STAGE 2: Phrase & Style Validation
   check-style:
