@@ -1,0 +1,33 @@
+name: Alfred the automated document validator
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+
+jobs:
+  # STAGE 1: Syntax Validation
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Markdown Syntax Lint
+      uses: DavidAnson/github-workflow-markdownlint@v1
+      with:
+        config: '.markdownlint.json'
+
+  # STAGE 2: Phrase & Style Validation
+  check-style:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Phrase and Style Lint (Vale)
+      uses: errata-ai/vale-action@v2
+      with:
+        files: '**/*.md'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
