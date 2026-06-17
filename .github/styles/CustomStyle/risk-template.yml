@@ -1,0 +1,9 @@
+extends: existence
+message: "In the description, you must use the exact template: 'The Android platform provides [feature name] feature.'"
+level: error
+scope: text
+# This tells Vale to only look at text inside the description block
+block: ^##\s*description\b(?:\n.*?)*?(?=\n##|$)
+raw:
+  - '(?i)\bAndroid\b.*?\bprovides?\b(?!.*?\bplatform\b)'
+  - '(?i)\bAndroid\b.*?\bfeature\b(?!.*?\bThe Android platform provides\b)'
