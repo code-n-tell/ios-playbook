@@ -6,6 +6,10 @@ on:
 jobs:
   review-playbooks:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      models: read
 
     steps:
       - name: Prepare the submitted materials for review
@@ -43,7 +47,7 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
-      - name: Review the changed playbooks for required structure and clarity
+      - name: Review the changed playbooks for required structure
         shell: bash
         run: |
           echo "The review is now examining each changed playbook document."
@@ -57,3 +61,15 @@ jobs:
 
           echo "The detailed validator output begins below."
           printf '%s\n' "${{ steps.changed.outputs.files }}" | node scripts/validate-playbooks.mjs --stdin
+
+      - name: Review the changed playbooks for advisory clarity feedback
+        if: steps.changed.outputs.files != ''
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "The advisory clarity phase is now reviewing the changed playbook documents."
+          echo "This phase uses GitHub Models to suggest clearer wording, stronger section flow, and more understandable demonstration steps."
+          echo "This phase does not block the pull request. It only adds guidance for authors and reviewers."
+
+          printf '%s\n' "${{ steps.changed.outputs.files }}" | node scripts/clarity-playbooks.mjs --stdin

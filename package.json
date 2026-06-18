@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "validate:playbooks": "node scripts/validate-playbooks.mjs"
+    "validate:playbooks": "node scripts/validate-playbooks.mjs",
+    "clarity:playbooks": "node scripts/clarity-playbooks.mjs",
+    "test:clarity:playbooks": "node --test scripts/clarity-playbooks.test.mjs"
   }
 }
