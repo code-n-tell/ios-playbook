@@ -1,6 +1,6 @@
 ## platform-feature-01
 ### Description
-The Android platform provides Feature 01 feature.
+The iOS platform provides Feature 01 feature.
 ### Additional context
 Feature 01 is a feature that protects sensitive data at rest.
 ### Demonstration

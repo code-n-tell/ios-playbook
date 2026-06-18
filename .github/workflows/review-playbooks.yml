@@ -81,7 +81,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "The advisory technical completeness phase is now reviewing the changed playbook documents."
-          echo "This phase uses GitHub Models to flag likely incorrect Android or security claims, unsupported overclaims, and missing technical assumptions."
+          echo "This phase uses GitHub Models to flag likely incorrect iOS or security claims, unsupported overclaims, and missing technical assumptions."
           echo "This phase does not block the pull request. It only adds structured guidance for authors and reviewers."
 
           printf '%s\n' "${{ steps.changed.outputs.files }}" | node scripts/completeness-playbooks.mjs --stdin

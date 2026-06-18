@@ -163,7 +163,7 @@ async function reviewFileWithGitHubModels(filePath) {
 
 function buildSystemPrompt() {
   return [
-    "You review Android playbook Markdown files for clarity only.",
+    "You review iOS playbook Markdown files for clarity only.",
     "Do not check format compliance, policy compliance, security completeness, or missing required template sections.",
     "Report only advisory clarity findings that help an author rewrite the playbook for human readers.",
     `Use only these categories: ${Array.from(ALLOWED_CATEGORIES).join(", ")}.`,

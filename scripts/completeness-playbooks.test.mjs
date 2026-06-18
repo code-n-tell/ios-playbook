@@ -14,7 +14,7 @@ test("normalizeModelResponse accepts a valid incorrect-claim finding", () => {
           message: "The playbook says plaintext local storage protects secrets at rest, which is technically incorrect.",
           evidence: "Feature 01 is a feature that protects sensitive data at rest.",
           whyItMatters: "Readers could implement storage that does not provide the security property being claimed.",
-          suggestedRewrite: "Explain the actual Android protection mechanism and how it safeguards stored secrets at rest.",
+          suggestedRewrite: "Explain the actual iOS protection mechanism and how it safeguards stored secrets at rest.",
         },
       ],
     }),
@@ -32,7 +32,7 @@ test("normalizeModelResponse accepts a valid incorrect-claim finding", () => {
       message: "The playbook says plaintext local storage protects secrets at rest, which is technically incorrect.",
       evidence: "Feature 01 is a feature that protects sensitive data at rest.",
       whyItMatters: "Readers could implement storage that does not provide the security property being claimed.",
-      suggestion: "Explain the actual Android protection mechanism and how it safeguards stored secrets at rest.",
+      suggestion: "Explain the actual iOS protection mechanism and how it safeguards stored secrets at rest.",
     },
   ]);
 });
@@ -109,10 +109,10 @@ test("normalizeModelResponse rejects out-of-range line numbers", () => {
         {
           line: 40,
           category: "platform_mismatch",
-          message: "The playbook describes an iOS API in an Android document.",
+          message: "The playbook describes an iOS API in an iOS document.",
           evidence: "Use the iOS Keychain to store the secret.",
           whyItMatters: "Readers would be directed to the wrong platform mechanism.",
-          suggestedRewrite: "Replace the iOS-specific mechanism with the correct Android one.",
+          suggestedRewrite: "Replace the iOS-specific mechanism with the correct iOS one.",
         },
       ],
     }),
@@ -195,7 +195,7 @@ test("normalizeModelResponse rejects findings without a suggestion field", () =>
 test("extractCompletenessContent preserves original line numbers and excludes headings and tables", () => {
   const content = extractCompletenessContent(`## platform-feature-01
 ### Description
-The Android platform provides Secure Storage feature.
+The iOS platform provides Secure Storage feature.
 ### Additional context
 Secure Storage is a feature that protects application secrets stored on the device by encrypting them at rest.
 ### Demonstration
@@ -209,7 +209,7 @@ Perform the following steps to enable Secure Storage:
   assert.doesNotMatch(content, /^## /m);
   assert.doesNotMatch(content, /^### /m);
   assert.doesNotMatch(content, /^\|/m);
-  assert.match(content, /^3: The Android platform provides Secure Storage feature\.$/m);
+  assert.match(content, /^3: The iOS platform provides Secure Storage feature\.$/m);
   assert.match(content, /^7: Set up demo app with the following configuration:$/m);
   assert.match(content, /^11: Perform the following steps to enable Secure Storage:$/m);
   assert.match(content, /^12: 1\. Update the app to use encrypted storage to protect the secret at rest$/m);

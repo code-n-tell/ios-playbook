@@ -187,9 +187,9 @@ function validateFeatureFile(filePath, basename, items, passLogs) {
   // - the same feature name must be reused across related sections
   state.expectText("### Description", "feature.description_heading", "The next required section heading is '### Description'.");
   const description = state.expect(
-    /^The Android platform provides (.+) feature\.$/,
+    /^The iOS platform provides (.+) feature\.$/,
     "feature.description_sentence",
-    "The description sentence must be written exactly as 'The Android platform provides <feature_name> feature.'."
+    "The description sentence must be written exactly as 'The iOS platform provides <feature_name> feature.'."
   );
   if (!description) {
     return state.diagnostics;
@@ -299,8 +299,8 @@ function validateRiskFile(filePath, basename, items, passLogs) {
   state.expectText("### Description", "risk.description_heading", "The next required section heading is '### Description'.");
   const description = state.expectOneOf(
     [
-      /^Because the Android platform provides (.+) feature, your application is at risk of an attacker (.+)\.$/,
-      /^Because the Android platform provides (.+) feature, your application$/,
+      /^Because the iOS platform provides (.+) feature, your application is at risk of an attacker (.+)\.$/,
+      /^Because the iOS platform provides (.+) feature, your application$/,
     ],
     "risk.description_sentence",
     "The risk description must follow the approved public template exactly."

@@ -1,6 +1,6 @@
 ## platform-feature-01
 ### Description
-The Android platform provides {feature_name} feature.
+The iOS platform provides {feature_name} feature.
 ### Additional context
 Feature 02 is a feature that protects sensitive data at rest.
 ### Demonstration

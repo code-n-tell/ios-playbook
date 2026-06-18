@@ -29,8 +29,8 @@ const COMPLETENESS_CATEGORIES = new Set([
   "missing_threat_assumption",
 ]);
 const COMPLETENESS_RUBRIC = [
-  "platform mismatches where Android content describes non-Android behavior or APIs",
-  "technically incorrect explanations of Android or security mechanisms",
+  "platform mismatches where iOS content describes non-iOS behavior or APIs",
+  "technically incorrect explanations of iOS or security mechanisms",
   "unsupported or overstated security claims",
   "missing prerequisites or assumptions needed to make a claim technically sound",
   "demonstration steps that contradict the described feature, risk, or control",
@@ -176,7 +176,7 @@ async function reviewFileWithGitHubModels(filePath) {
 
 function buildSystemPrompt() {
   return [
-    "You review Android playbook Markdown files for technical completeness.",
+    "You review iOS playbook Markdown files for technical completeness.",
     "Do not check format compliance, section completeness, prose clarity, or style.",
     "Report only high-confidence findings about technical gaps or likely incorrect technical claims.",
     "When uncertain, return an empty findings array.",

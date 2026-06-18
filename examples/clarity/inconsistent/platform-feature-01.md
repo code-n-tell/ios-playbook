@@ -1,6 +1,6 @@
 ## platform-feature-01
 ### Description
-The Android platform provides Secure Storage feature.
+The iOS platform provides Secure Storage feature.
 ### Additional context
 Credential Vault is a feature that protects application secrets stored on the device by encrypting them at rest.
 ### Demonstration

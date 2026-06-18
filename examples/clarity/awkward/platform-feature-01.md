@@ -1,6 +1,6 @@
 ## platform-feature-01
 ### Description
-The Android platform provides Secure Storage feature.
+The iOS platform provides Secure Storage feature.
 ### Additional context
 Secure Storage is a feature that does things for secrets in a way that is safer for many app situations.
 ### Demonstration

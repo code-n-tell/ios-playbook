@@ -6,7 +6,7 @@ This document defines the proposed Phase 3 review for playbooks: AI-assisted tec
 
 Phase 3 should help reviewers answer:
 
-- Are the technical claims in this playbook likely correct for Android?
+- Are the technical claims in this playbook likely correct for iOS?
 - Does the playbook omit technical context that is necessary for those claims to hold up?
 
 This phase should follow the existing review model already used in this repository:
@@ -97,7 +97,7 @@ The model should be tightly constrained.
 
 System prompt requirements:
 
-- review Android playbook Markdown files for technical completeness
+- review iOS playbook Markdown files for technical completeness
 - do not check format, style, completeness of template sections, or prose clarity
 - return no finding when uncertain
 - do not speculate about implementation details that are not stated
@@ -235,7 +235,7 @@ Completeness categories should remain advisory.
 Phase 3 should not attempt:
 
 - full internet-backed fact checking
-- exhaustive Android security auditing
+- exhaustive iOS security auditing
 - judgment about whether a playbook is ideal or complete in every possible way
 - replacement for human security review
 

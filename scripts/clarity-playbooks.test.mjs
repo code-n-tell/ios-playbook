@@ -12,7 +12,7 @@ test("normalizeModelResponse accepts a valid advisory finding", () => {
           line: 4,
           category: "ambiguity",
           message: "The feature description uses a generic phrase that does not tell readers what is protected.",
-          suggestedRewrite: "The Android platform provides Secure Storage, a feature for encrypting app secrets stored on the device.",
+          suggestedRewrite: "The iOS platform provides Secure Storage, a feature for encrypting app secrets stored on the device.",
         },
       ],
     }),
@@ -28,7 +28,7 @@ test("normalizeModelResponse accepts a valid advisory finding", () => {
       severity: "advisory",
       category: "ambiguity",
       message: "The feature description uses a generic phrase that does not tell readers what is protected.",
-      suggestedRewrite: "The Android platform provides Secure Storage, a feature for encrypting app secrets stored on the device.",
+      suggestedRewrite: "The iOS platform provides Secure Storage, a feature for encrypting app secrets stored on the device.",
     },
   ]);
 });
@@ -75,7 +75,7 @@ test("normalizeModelResponse rejects out-of-range line numbers", () => {
 test("extractClarityContent excludes template headings and Markdown tables", () => {
   const content = extractClarityContent(`## platform-feature-01
 ### Description
-The Android platform provides Secure Storage feature.
+The iOS platform provides Secure Storage feature.
 ### Additional context
 Secure Storage is a feature that protects application secrets stored on the device by encrypting them at rest.
 ### Demonstration
@@ -89,7 +89,7 @@ Perform the following steps to enable Secure Storage:
   assert.doesNotMatch(content, /^## /m);
   assert.doesNotMatch(content, /^### /m);
   assert.doesNotMatch(content, /^\|/m);
-  assert.match(content, /The Android platform provides Secure Storage feature\./);
+  assert.match(content, /The iOS platform provides Secure Storage feature\./);
   assert.match(content, /Set up demo app with the following configuration:/);
   assert.match(content, /Perform the following steps to enable Secure Storage:/);
 });
