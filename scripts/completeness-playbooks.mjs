@@ -5,29 +5,42 @@ import { pathToFileURL } from "node:url";
 const args = process.argv.slice(2);
 const useStdin = args.includes("--stdin");
 
-const MODEL_NAME = process.env.GITHUB_MODELS_CLARITY_MODEL || "openai/gpt-4o-mini";
+const MODEL_NAME = process.env.GITHUB_MODELS_COMPLETENESS_MODEL || "openai/gpt-4o-mini";
 const MODELS_API_URL = "https://models.github.ai/inference/chat/completions";
 const MAX_FINDINGS_PER_FILE = 5;
-const ALLOWED_CATEGORIES = new Set([
-  "ambiguity",
-  "flow",
-  "demonstration",
-  "terminology",
-  "rewrite",
+const MAX_COMPLETENESS_FINDINGS_PER_FILE = 2;
+const CORRECTNESS_CATEGORIES = new Set([
+  "platform_mismatch",
+  "incorrect_mechanism",
+  "unsupported_claim",
+  "security_overclaim",
+  "demo_inconsistency",
+  "missing_prerequisite",
+  "missing_constraint",
+  "missing_security_tradeoff",
+  "missing_platform_detail",
+  "missing_threat_assumption",
 ]);
-const CLARITY_RUBRIC = [
-  "ambiguous or vague wording",
-  "weak section-to-section flow",
-  "hard-to-follow demonstration steps",
-  "inconsistent terminology within a file",
-  "concrete rewrite suggestions for unclear sentences",
+const COMPLETENESS_CATEGORIES = new Set([
+  "missing_prerequisite",
+  "missing_constraint",
+  "missing_security_tradeoff",
+  "missing_platform_detail",
+  "missing_threat_assumption",
+]);
+const COMPLETENESS_RUBRIC = [
+  "platform mismatches where Android content describes non-Android behavior or APIs",
+  "technically incorrect explanations of Android or security mechanisms",
+  "unsupported or overstated security claims",
+  "missing prerequisites or assumptions needed to make a claim technically sound",
+  "demonstration steps that contradict the described feature, risk, or control",
 ];
 
 export async function main() {
   const filePaths = useStdin ? await readPathsFromStdin() : walkMarkdownFiles("playbooks");
 
   if (filePaths.length === 0) {
-    console.log("No playbook Markdown files were provided for clarity review, so there is nothing to examine in this run.");
+    console.log("No playbook Markdown files were provided for technical completeness review, so there is nothing to examine in this run.");
     return;
   }
 
@@ -35,9 +48,9 @@ export async function main() {
     emitGitHubNotice({
       file: filePaths[0],
       line: 1,
-      message: "The advisory clarity review was skipped because no GITHUB_TOKEN was available for GitHub Models.",
+      message: "The advisory technical completeness review was skipped because no GITHUB_TOKEN was available for GitHub Models.",
     });
-    console.log("The advisory clarity review was skipped because no GITHUB_TOKEN was available for GitHub Models.");
+    console.log("The advisory technical completeness review was skipped because no GITHUB_TOKEN was available for GitHub Models.");
     return;
   }
 
@@ -53,7 +66,7 @@ export async function main() {
       emitGitHubNotice({
         file: filePath,
         line: 1,
-        message: "The advisory clarity review skipped this file because it is not present in the current repository snapshot.",
+        message: "The advisory technical completeness review skipped this file because it is not present in the current repository snapshot.",
       });
       continue;
     }
@@ -65,9 +78,9 @@ export async function main() {
       emitGitHubNotice({
         file: filePath,
         line: 1,
-        message: `The advisory clarity review could not produce findings for this file. ${review.error}`,
+        message: `The advisory technical completeness review could not produce findings for this file. ${review.error}`,
       });
-      console.log(`${filePath}:1 NOTICE Advisory clarity review skipped detailed feedback: ${review.error}`);
+      console.log(`${filePath}:1 NOTICE Advisory technical completeness review skipped detailed feedback: ${review.error}`);
       continue;
     }
 
@@ -75,9 +88,9 @@ export async function main() {
       emitGitHubNotice({
         file: filePath,
         line: 1,
-        message: "The advisory clarity review found no suggestions for this playbook.",
+        message: "The advisory technical completeness review found no suggestions for this playbook.",
       });
-      console.log(`${filePath}:1 PASS Advisory clarity review found no suggestions.`);
+      console.log(`${filePath}:1 PASS Advisory technical completeness review found no suggestions.`);
       continue;
     }
 
@@ -88,7 +101,7 @@ export async function main() {
   }
 
   console.log(
-    `The advisory clarity review completed. ${reviewedFiles} playbook file(s) were examined and ${totalFindings} advisory finding(s) were reported.`
+    `The advisory technical completeness review completed. ${reviewedFiles} playbook file(s) were examined and ${totalFindings} advisory finding(s) were reported.`
   );
 }
 
@@ -96,7 +109,7 @@ async function reviewFileWithGitHubModels(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
   const lines = raw.split(/\r?\n/);
   const type = inferTypeFromFilename(path.basename(filePath, ".md")) ?? "unknown";
-  const clarityContent = extractClarityContent(raw);
+  const completenessContent = extractCompletenessContent(raw);
 
   const requestBody = {
     model: MODEL_NAME,
@@ -108,7 +121,7 @@ async function reviewFileWithGitHubModels(filePath) {
       },
       {
         role: "user",
-        content: buildUserPrompt(filePath, type, clarityContent),
+        content: buildUserPrompt(filePath, type, completenessContent),
       },
     ],
   };
@@ -163,38 +176,40 @@ async function reviewFileWithGitHubModels(filePath) {
 
 function buildSystemPrompt() {
   return [
-    "You review Android playbook Markdown files for clarity only.",
-    "Do not check format compliance, policy compliance, security completeness, or missing required template sections.",
-    "Report only advisory clarity findings that help an author rewrite the playbook for human readers.",
-    `Use only these categories: ${Array.from(ALLOWED_CATEGORIES).join(", ")}.`,
-    `Limit findings to at most ${MAX_FINDINGS_PER_FILE}.`,
-    "If the playbook is already clear, return an empty findings array.",
+    "You review Android playbook Markdown files for technical completeness.",
+    "Do not check format compliance, section completeness, prose clarity, or style.",
+    "Report only high-confidence findings about technical gaps or likely incorrect technical claims.",
+    "When uncertain, return an empty findings array.",
+    "Do not speculate about implementation details that are not stated in the playbook.",
+    "Every finding must cite exact evidence copied from the playbook content supplied by the user.",
+    `Use only these categories: ${Array.from(CORRECTNESS_CATEGORIES).join(", ")}.`,
+    `Limit findings to at most ${MAX_FINDINGS_PER_FILE}, and include at most ${MAX_COMPLETENESS_FINDINGS_PER_FILE} findings from completeness categories.`,
     "Return strict JSON only with this shape:",
-    '{"summary":"short summary","findings":[{"line":12,"category":"ambiguity","message":"short explanation","suggestedRewrite":"concrete replacement text"}]}',
+    '{"summary":"short summary","findings":[{"line":12,"category":"platform_mismatch","message":"short explanation","evidence":"quoted playbook text","whyItMatters":"why the issue matters","suggestedRewrite":"concrete replacement text"}]}',
+    "For missing-context findings, use 'suggestedAddition' instead of 'suggestedRewrite'.",
     "Do not wrap the JSON in Markdown fences.",
   ].join("\n");
 }
 
 function buildUserPrompt(filePath, type, raw) {
   return [
-    "Review this playbook for clarity using the rubric below.",
-    "Exclude template headings, section headings, filenames, and Markdown tables from your review.",
-    "Focus only on the remaining prose and numbered instruction lines.",
-    `Rubric: ${CLARITY_RUBRIC.join("; ")}.`,
+    "Review this playbook for technical completeness using the rubric below.",
+    "Ignore template headings and Markdown tables. Focus on substantive prose and numbered instruction lines.",
+    `Rubric: ${COMPLETENESS_RUBRIC.join("; ")}.`,
     `File: ${filePath}`,
     `Playbook type: ${type}`,
     "",
-    "Playbook content:",
+    "Playbook content with original line numbers:",
     raw,
   ].join("\n");
 }
 
-export function extractClarityContent(raw) {
+export function extractCompletenessContent(raw) {
   const lines = raw.split(/\r?\n/);
   const filteredLines = [];
   let insideTable = false;
 
-  for (const line of lines) {
+  for (const [index, line] of lines.entries()) {
     const trimmed = line.trim();
 
     if (trimmed.startsWith("|")) {
@@ -210,15 +225,11 @@ export function extractClarityContent(raw) {
       continue;
     }
 
-    if (isIgnoredHeading(trimmed)) {
+    if (trimmed.length === 0 || isIgnoredHeading(trimmed)) {
       continue;
     }
 
-    if (trimmed.length === 0) {
-      continue;
-    }
-
-    filteredLines.push(line);
+    filteredLines.push(`${index + 1}: ${trimmed}`);
   }
 
   return filteredLines.join("\n");
@@ -244,25 +255,26 @@ export function normalizeModelResponse(rawContent, filePath, lineCount) {
   } catch (error) {
     return {
       findings: [],
-      error: `The advisory clarity response was not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+      error: `The advisory technical completeness response was not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return {
       findings: [],
-      error: "The advisory clarity response must be a JSON object with a 'findings' array.",
+      error: "The advisory technical completeness response must be a JSON object with a 'findings' array.",
     };
   }
 
   if (!Array.isArray(parsed.findings)) {
     return {
       findings: [],
-      error: "The advisory clarity response did not include a valid 'findings' array.",
+      error: "The advisory technical completeness response did not include a valid 'findings' array.",
     };
   }
 
   const findings = [];
+  let completenessFindings = 0;
 
   for (const [index, finding] of parsed.findings.entries()) {
     if (findings.length >= MAX_FINDINGS_PER_FILE) {
@@ -273,8 +285,15 @@ export function normalizeModelResponse(rawContent, filePath, lineCount) {
     if (normalized.error) {
       return {
         findings: [],
-        error: `The advisory clarity response contained an invalid finding at position ${index + 1}: ${normalized.error}`,
+        error: `The advisory technical completeness response contained an invalid finding at position ${index + 1}: ${normalized.error}`,
       };
+    }
+
+    if (COMPLETENESS_CATEGORIES.has(normalized.finding.category)) {
+      if (completenessFindings >= MAX_COMPLETENESS_FINDINGS_PER_FILE) {
+        continue;
+      }
+      completenessFindings += 1;
     }
 
     findings.push(normalized.finding);
@@ -296,9 +315,9 @@ function normalizeFinding(finding, filePath, lineCount) {
     return { error: `The line value ${finding.line} falls outside the file's line range of 1 to ${lineCount}.` };
   }
 
-  if (typeof finding.category !== "string" || !ALLOWED_CATEGORIES.has(finding.category)) {
+  if (typeof finding.category !== "string" || !CORRECTNESS_CATEGORIES.has(finding.category)) {
     return {
-      error: `Each finding category must be one of: ${Array.from(ALLOWED_CATEGORIES).join(", ")}.`,
+      error: `Each finding category must be one of: ${Array.from(CORRECTNESS_CATEGORIES).join(", ")}.`,
     };
   }
 
@@ -306,8 +325,23 @@ function normalizeFinding(finding, filePath, lineCount) {
     return { error: "Each finding must include a non-empty 'message' string." };
   }
 
-  if (typeof finding.suggestedRewrite !== "string" || finding.suggestedRewrite.trim().length === 0) {
-    return { error: "Each finding must include a non-empty 'suggestedRewrite' string." };
+  if (typeof finding.evidence !== "string" || finding.evidence.trim().length === 0) {
+    return { error: "Each finding must include a non-empty 'evidence' string." };
+  }
+
+  if (typeof finding.whyItMatters !== "string" || finding.whyItMatters.trim().length === 0) {
+    return { error: "Each finding must include a non-empty 'whyItMatters' string." };
+  }
+
+  const suggestionField =
+    typeof finding.suggestedRewrite === "string" && finding.suggestedRewrite.trim().length > 0
+      ? finding.suggestedRewrite
+      : typeof finding.suggestedAddition === "string" && finding.suggestedAddition.trim().length > 0
+        ? finding.suggestedAddition
+        : null;
+
+  if (!suggestionField) {
+    return { error: "Each finding must include a non-empty 'suggestedRewrite' or 'suggestedAddition' string." };
   }
 
   return {
@@ -317,7 +351,9 @@ function normalizeFinding(finding, filePath, lineCount) {
       severity: "advisory",
       category: finding.category,
       message: finding.message.trim(),
-      suggestedRewrite: finding.suggestedRewrite.trim(),
+      evidence: finding.evidence.trim(),
+      whyItMatters: finding.whyItMatters.trim(),
+      suggestion: suggestionField.trim(),
     },
   };
 }
@@ -406,16 +442,16 @@ function readPathsFromStdin() {
   });
 }
 
-function emitGitHubWarning({ file, line, severity, category, message, suggestedRewrite }) {
+function emitGitHubWarning({ file, line, severity, category, message, evidence, whyItMatters, suggestion }) {
   const escapedMessage = escapeWorkflowValue(
-    `[${severity}/${category}] ${message} Suggested rewrite: ${suggestedRewrite}`
+    `[${severity}/${category}] ${message} Evidence: ${evidence} Why it matters: ${whyItMatters} Suggestion: ${suggestion}`
   );
-  console.log(`::warning file=${file},line=${line},title=Playbook clarity::${escapedMessage}`);
+  console.log(`::warning file=${file},line=${line},title=Playbook technical completeness::${escapedMessage}`);
 }
 
 function emitGitHubNotice({ file, line, message }) {
   const escapedMessage = escapeWorkflowValue(message);
-  console.log(`::notice file=${file},line=${line},title=Playbook clarity::${escapedMessage}`);
+  console.log(`::notice file=${file},line=${line},title=Playbook technical completeness::${escapedMessage}`);
 }
 
 function escapeWorkflowValue(value) {

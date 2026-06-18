@@ -5,7 +5,9 @@
   "scripts": {
     "validate:playbooks": "node scripts/validate-playbooks.mjs",
     "clarity:playbooks": "node scripts/clarity-playbooks.mjs",
+    "completeness:playbooks": "node scripts/completeness-playbooks.mjs",
     "test:clarity:playbooks": "node --test scripts/clarity-playbooks.test.mjs",
+    "test:completeness:playbooks": "node --test scripts/completeness-playbooks.test.mjs",
     "test:validate:playbooks": "node --test scripts/validate-playbooks.test.mjs"
   }
 }
