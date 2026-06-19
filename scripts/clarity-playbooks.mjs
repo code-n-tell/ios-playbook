@@ -219,15 +219,15 @@ function buildTypeSpecificSystemGuidance(type) {
     return [
       "You are reviewing a risk playbook.",
       "For numbered demonstration steps, prefer rewrites that begin with a clear action verb and explain the objective in plain language.",
-      "Preserve the original step intent. Do not suggest rewrites that change the meaning of a step.",
-      "Favor consistent patterns such as 'Open X by doing Y' when that improves readability.",
+      "Favor consistent patterns such as 'Open X to do Y' when that improves readability.",
     ];
   }
 
   if (type === "control") {
     return [
       "You are reviewing a control playbook.",
-      "For the two numbered control steps, prefer rewrites that keep a consistent pattern such as 'Detect <something> by <method>' and 'Prevent <something> by <method>'.",
+      "For numbered control steps, prefer rewrites that begin with a clear action verb and preserve the original step intent.",
+      "Favor consistent patterns such as 'Open X by doing Y' when that improves readability.",
       "Do not suggest feature-name rewrites for control playbooks.",
     ];
   }
@@ -247,13 +247,13 @@ function buildTypeSpecificUserGuidance(type) {
 
   if (type === "risk") {
     return [
-      "Pay special attention to whether each numbered Demonstration step starts with a clear action verb, preserves the original intent, and follows a consistent pattern such as '<action verb> <something> by <method>' or 'Open X to do Y'.",
+      "Pay special attention to whether each numbered Demonstration step starts with a clear action verb and follows a consistent pattern such as '<action verb> <something> by <method>' or 'Open X to do Y'.",
     ];
   }
 
   if (type === "control") {
     return [
-      "Pay special attention to whether the two numbered steps follow a consistent detect/prevent pattern such as 'Detect X by Y' and 'Prevent X by Y'.",
+      "Pay special attention to whether numbered control steps start with a clear action verb, preserve the original intent, and follow a consistent pattern such as '<action verb> <something> by <method>'.",
     ];
   }
 
@@ -290,7 +290,7 @@ function buildRubricForType(type) {
   if (type === "control") {
     return [
       ...baseRubric,
-      "control steps that should follow a consistent detect/prevent instruction pattern",
+      "control steps that should start with a clear action verb and preserve their original intent",
     ];
   }
 

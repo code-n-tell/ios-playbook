@@ -19,8 +19,6 @@ test("buildClarityPrompts gives risk-specific guidance", () => {
 
   assert.match(prompts.system, /reviewing a risk playbook/i);
   assert.match(prompts.system, /Open X to do Y/i);
-  assert.match(prompts.system, /Do not rewrite risk demonstration steps into 'Detect \.\.\.' or 'Prevent \.\.\.'/i);
-  assert.match(prompts.user, /preserves the original intent/i);
   assert.doesNotMatch(prompts.system, /keep it to 1 to 3 words/i);
   assert.doesNotMatch(prompts.user, /Description uses a concise feature name/i);
   assert.doesNotMatch(prompts.system, /Detect <something> by <method>/i);
@@ -30,8 +28,9 @@ test("buildClarityPrompts gives control-specific guidance", () => {
   const prompts = buildClarityPrompts("playbooks/platform-feature-01-risk-01-control-01.md", "control", "3: demo");
 
   assert.match(prompts.system, /reviewing a control playbook/i);
-  assert.match(prompts.system, /Detect <something> by <method>/i);
-  assert.match(prompts.user, /Detect X by Y/i);
+  assert.match(prompts.system, /preserve the original step intent/i);
+  assert.match(prompts.system, /Do not rewrite control steps into 'Detect \.\.\.' or 'Prevent \.\.\.'/i);
+  assert.match(prompts.user, /preserve the original intent/i);
   assert.doesNotMatch(prompts.system, /keep it to 1 to 3 words/i);
   assert.doesNotMatch(prompts.user, /Open X to do Y/i);
 });
