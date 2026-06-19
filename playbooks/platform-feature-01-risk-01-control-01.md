@@ -29,8 +29,5 @@ Your app can prevent the risk of an attacker from analysing the application's IP
 
 *\*note: at runtime, the app must eventually reconstruct the plaintext value to compare it. So Swift Confidential protects mainly against easy static extraction with tools like strings, but it does not stop a determined attacker from debugging the app, hooking the getter, dumping memory, or patching the login result.*
 
-References:
-- https://github.com/securevale/swift-confidential.git
-- https://github.com/securevale/swift-confidential-plugin.git
-
-The IPA with the implemented control can be found here.
+### References
+The IPA with the implemented control can be found [here].
