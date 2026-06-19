@@ -99,7 +99,7 @@ export async function main() {
 
 async function reviewFileWithGitHubModels(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
-  const lines = raw.split(/\r?\n/);
+  const lines = splitMarkdownLinesIgnoringCodeBlocks(raw);
   const type = inferTypeFromFilename(path.basename(filePath, ".md")) ?? "unknown";
   const clarityContent = extractClarityContent(raw);
   const prompts = buildClarityPrompts(filePath, type, clarityContent);
@@ -298,7 +298,7 @@ function buildRubricForType(type) {
 }
 
 export function extractClarityContent(raw) {
-  const lines = raw.split(/\r?\n/);
+  const lines = splitMarkdownLinesIgnoringCodeBlocks(raw);
   const filteredLines = [];
   let insideTable = false;
 
@@ -358,6 +358,24 @@ function isIgnoredTemplateLine(trimmed) {
     /^Because the iOS platform provides .+ feature, your app is at risk of:$/.test(trimmed) ||
     /^The APK with the implemented control can be found \[here\]\((.+)\)\.$/.test(trimmed)
   );
+}
+
+function splitMarkdownLinesIgnoringCodeBlocks(raw) {
+  const lines = raw.split(/\r?\n/);
+  const sanitizedLines = [];
+  let insideCodeBlock = false;
+
+  for (const line of lines) {
+    if (/^\s*```/.test(line)) {
+      sanitizedLines.push("");
+      insideCodeBlock = !insideCodeBlock;
+      continue;
+    }
+
+    sanitizedLines.push(insideCodeBlock ? "" : line);
+  }
+
+  return sanitizedLines;
 }
 
 export function normalizeModelResponse(rawContent, filePath, linesOrLineCount) {

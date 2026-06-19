@@ -242,6 +242,18 @@ Perform the following steps to enable Secure Storage:
   assert.match(content, /^12: 1\. Update the app to use encrypted storage to protect the secret at rest$/m);
 });
 
+test("extractCompletenessContent ignores fenced Markdown code blocks", () => {
+  const content = extractCompletenessContent(`## platform-feature-01
+### Demonstration
+\`\`\`md
+1. Ignore this code sample step
+\`\`\`
+1. Keep this real step`);
+
+  assert.doesNotMatch(content, /Ignore this code sample step/);
+  assert.match(content, /^6: 1\. Keep this real step$/m);
+});
+
 test("collectStaticCompletenessFindings warns when a control step does not start with Detect or Prevent", () => {
   const findings = collectStaticCompletenessFindings(
     "playbooks/platform-feature-01-risk-01-control-01.md",

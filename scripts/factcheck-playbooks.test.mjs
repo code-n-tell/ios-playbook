@@ -56,6 +56,18 @@ The IPA with the implemented control can be found [here](../artifacts/example.ip
   assert.match(content, /^10: 2\. Build the app with the new storage layer$/m);
 });
 
+test("extractFactCheckContent ignores fenced Markdown code blocks", () => {
+  const content = extractFactCheckContent(`## platform-feature-01
+### Demonstration
+\`\`\`md
+1. Ignore this code sample step
+\`\`\`
+1. Keep this real step`);
+
+  assert.doesNotMatch(content, /Ignore this code sample step/);
+  assert.match(content, /^6: 1\. Keep this real step$/m);
+});
+
 test("normalizeModelResponse accepts a valid fact check finding", () => {
   const result = normalizeModelResponse(
     JSON.stringify({

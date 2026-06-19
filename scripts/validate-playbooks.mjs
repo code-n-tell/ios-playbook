@@ -81,7 +81,7 @@ async function main() {
 
 function validateFile(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
-  const lines = raw.split(/\r?\n/);
+  const lines = splitMarkdownLinesIgnoringCodeBlocks(raw);
   const diagnostics = [];
   const warnings = [];
   const passLogs = [];
@@ -921,6 +921,24 @@ function parseTableCells(line) {
     .split("|")
     .slice(1, -1)
     .map((cell) => cell.trim());
+}
+
+function splitMarkdownLinesIgnoringCodeBlocks(raw) {
+  const lines = raw.split(/\r?\n/);
+  const sanitizedLines = [];
+  let insideCodeBlock = false;
+
+  for (const line of lines) {
+    if (/^\s*```/.test(line)) {
+      sanitizedLines.push("");
+      insideCodeBlock = !insideCodeBlock;
+      continue;
+    }
+
+    sanitizedLines.push(insideCodeBlock ? "" : line);
+  }
+
+  return sanitizedLines;
 }
 
 function walkMarkdownFiles(rootDirectory) {

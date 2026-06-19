@@ -84,7 +84,7 @@ export async function main() {
 
 async function reviewFileWithGitHubModels(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
-  const lines = raw.split(/\r?\n/);
+  const lines = splitMarkdownLinesIgnoringCodeBlocks(raw);
   const type = inferTypeFromFilename(path.basename(filePath, ".md")) ?? "unknown";
   const factCheckContent = extractFactCheckContent(raw);
   const prompts = buildFactCheckPrompts(filePath, type, factCheckContent);
@@ -244,7 +244,7 @@ function buildTypeSpecificUserGuidance(type) {
 }
 
 export function extractFactCheckContent(raw) {
-  const lines = raw.split(/\r?\n/);
+  const lines = splitMarkdownLinesIgnoringCodeBlocks(raw);
   const filteredLines = [];
 
   for (const [index, line] of lines.entries()) {
@@ -276,6 +276,24 @@ function isIgnoredHeading(trimmed) {
   }
 
   return /^## platform-feature-(0[1-9]|[1-9][0-9])(?:-risk-(0[1-9]|[1-9][0-9]))?(?:-control-(0[1-9]|[1-9][0-9]))?$/.test(trimmed);
+}
+
+function splitMarkdownLinesIgnoringCodeBlocks(raw) {
+  const lines = raw.split(/\r?\n/);
+  const sanitizedLines = [];
+  let insideCodeBlock = false;
+
+  for (const line of lines) {
+    if (/^\s*```/.test(line)) {
+      sanitizedLines.push("");
+      insideCodeBlock = !insideCodeBlock;
+      continue;
+    }
+
+    sanitizedLines.push(insideCodeBlock ? "" : line);
+  }
+
+  return sanitizedLines;
 }
 
 export function normalizeModelResponse(rawContent, filePath, linesOrLineCount) {

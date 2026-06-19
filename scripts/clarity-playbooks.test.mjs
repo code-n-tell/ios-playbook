@@ -301,3 +301,21 @@ Perform the following steps to enable Secure Storage:
   assert.doesNotMatch(content, /^11: Perform the following steps to enable Secure Storage:$/m);
   assert.match(content, /^12: 1\. Update the app to do the needed thing for security$/m);
 });
+
+test("extractClarityContent ignores fenced Markdown code blocks", () => {
+  const content = extractClarityContent(`## platform-feature-01
+### Description
+The iOS platform provides Secure Storage feature.
+
+\`\`\`md
+This prose should be ignored.
+1. This numbered item should be ignored.
+\`\`\`
+
+### Demonstration
+1. Update the app to do the needed thing for security`);
+
+  assert.doesNotMatch(content, /This prose should be ignored/);
+  assert.doesNotMatch(content, /This numbered item should be ignored/);
+  assert.match(content, /^11: 1\. Update the app to do the needed thing for security$/m);
+});

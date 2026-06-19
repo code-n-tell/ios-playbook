@@ -85,7 +85,7 @@ export async function main() {
 
 async function reviewFileWithGitHubModels(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
-  const lines = raw.split(/\r?\n/);
+  const lines = splitMarkdownLinesIgnoringCodeBlocks(raw);
   const type = inferTypeFromFilename(path.basename(filePath, ".md")) ?? "unknown";
   const completenessContent = extractCompletenessContent(raw);
   const staticFindings = collectStaticCompletenessFindings(filePath, type, lines);
@@ -261,7 +261,7 @@ function buildTypeSpecificUserGuidance(type) {
 }
 
 export function extractCompletenessContent(raw) {
-  const lines = raw.split(/\r?\n/);
+  const lines = splitMarkdownLinesIgnoringCodeBlocks(raw);
   const filteredLines = [];
 
   for (const [index, line] of lines.entries()) {
@@ -310,6 +310,24 @@ export function collectStaticCompletenessFindings(filePath, type, lines) {
   }
 
   return findings;
+}
+
+function splitMarkdownLinesIgnoringCodeBlocks(raw) {
+  const lines = raw.split(/\r?\n/);
+  const sanitizedLines = [];
+  let insideCodeBlock = false;
+
+  for (const line of lines) {
+    if (/^\s*```/.test(line)) {
+      sanitizedLines.push("");
+      insideCodeBlock = !insideCodeBlock;
+      continue;
+    }
+
+    sanitizedLines.push(insideCodeBlock ? "" : line);
+  }
+
+  return sanitizedLines;
 }
 
 function isIgnoredHeading(trimmed) {

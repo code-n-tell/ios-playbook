@@ -411,6 +411,63 @@ test("risk goal sentences allow emphasized tactics with a short explanation", ()
   assert.match(result.stdout, /risk\.goal_sentence/);
 });
 
+test("format checks ignore fenced Markdown code blocks", () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ios-playbook-validator-"));
+  const filePath = path.join(tempRoot, "platform-feature-01.md");
+  const linkedRiskPath = path.join(tempRoot, "platform-feature-01-risk-01.md");
+
+  fs.writeFileSync(linkedRiskPath, "# placeholder\n", "utf8");
+
+  fs.writeFileSync(
+    filePath,
+    [
+      "## platform-feature-01",
+      "",
+      "### Description",
+      "",
+      "The iOS platform provides Secure Storage feature.",
+      "",
+      "### Additional context",
+      "",
+      "Secure Storage is a feature that protects application secrets stored on the device.",
+      "",
+      "### Demonstration",
+      "",
+      "Set up demo app with the following configuration:",
+      "",
+      "| Configuration | Detail |",
+      "| -------- | ------- |",
+      "",
+      "Perform the following steps to enable Secure Storage:",
+      "",
+      "1. Open the project settings to enable encrypted storage",
+      "",
+      "```md",
+      "{feature_name}",
+      "- [broken](missing.md)",
+      "| Bad | Table |",
+      "2. This numbered line inside code block should be ignored",
+      "```",
+      "",
+      "Because the iOS platform provides Secure Storage feature, your app is at risk of:",
+      "",
+      "- [platform-feature-01-risk-01](platform-feature-01-risk-01.md)",
+      "",
+    ].join("\n"),
+    "utf8"
+  );
+
+  const result = runValidator([filePath]);
+
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+
+  assert.equal(result.status, 0);
+  assert.doesNotMatch(result.stdout, /placeholder\./);
+  assert.doesNotMatch(result.stdout, /link\.internal_exists/);
+  assert.doesNotMatch(result.stdout, /table\.markdown_/);
+  assert.doesNotMatch(result.stdout, /Numbered list item 2 passed the 'feature\.demo_steps'/);
+});
+
 function runValidator(filePaths) {
   return spawnSync(process.execPath, [scriptPath, "--stdin"], {
     cwd: repoRoot,
