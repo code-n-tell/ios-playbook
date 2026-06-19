@@ -168,13 +168,15 @@ function buildSystemPrompt() {
   return [
     "You review iOS playbook Markdown files for numbered-step technical completeness only.",
     "Do not review descriptions, goals, references, screenshots, formatting, section completeness, or prose style.",
-    "Review only the numbered instruction lines supplied by the user.",
+    "Review the numbered instruction lines as one end-to-end sequence.",
     "When uncertain, return an empty findings array.",
     "Do not speculate about implementation details that are not stated in the numbered steps.",
     `Use only these categories: ${Array.from(CORRECTNESS_CATEGORIES).join(", ")}.`,
     `Limit findings to at most ${MAX_FINDINGS_PER_FILE}.`,
     "Return strict JSON only with this shape:",
-    '{"summary":"short summary","findings":[{"line":12,"category":"step_review","understanding":"what the step appears to do","improvement":"what could be better"}]}',
+    '{"summary":"short summary","overallUnderstanding":"what the full numbered-step sequence appears to do","findings":[{"line":12,"category":"step_review","improvement":"what could be better"}]}',
+    "There must be exactly one overallUnderstanding string for the whole sequence.",
+    "Each finding should describe one missing or weak part of the overall flow, not repeat the entire understanding.",
     "Do not wrap the JSON in Markdown fences.",
   ].join("\n");
 }
@@ -183,7 +185,8 @@ function buildUserPrompt(filePath, type, raw) {
   return [
     "Review this playbook's numbered steps using the rubric below.",
     "Ignore all non-numbered lines. Focus only on the numbered instruction lines that remain in the supplied content.",
-    "For each finding, report only two things: your understanding of what the step is doing, and what could be better.",
+    "First, form one overall understanding of what the full numbered-step sequence is trying to do.",
+    "Then, report one or more specific things that could be better in the technical flow.",
     `Rubric: ${COMPLETENESS_RUBRIC.join("; ")}.`,
     `File: ${filePath}`,
     `Playbook type: ${type}`,
@@ -282,13 +285,20 @@ export function normalizeModelResponse(rawContent, filePath, lineCount) {
     };
   }
 
+  if (typeof parsed.overallUnderstanding !== "string" || parsed.overallUnderstanding.trim().length === 0) {
+    return {
+      findings: [],
+      error: "The advisory technical completeness response must include a non-empty 'overallUnderstanding' string.",
+    };
+  }
+
   const findings = [];
   for (const [index, finding] of parsed.findings.entries()) {
     if (findings.length >= MAX_FINDINGS_PER_FILE) {
       break;
     }
 
-    const normalized = normalizeFinding(finding, filePath, lineCount);
+    const normalized = normalizeFinding(finding, filePath, lineCount, parsed.overallUnderstanding);
     if (normalized.error) {
       return {
         findings: [],
@@ -302,7 +312,7 @@ export function normalizeModelResponse(rawContent, filePath, lineCount) {
   return { findings, error: null };
 }
 
-function normalizeFinding(finding, filePath, lineCount) {
+function normalizeFinding(finding, filePath, lineCount, overallUnderstanding) {
   if (!finding || typeof finding !== "object" || Array.isArray(finding)) {
     return { error: "Each finding must be a JSON object." };
   }
@@ -321,10 +331,6 @@ function normalizeFinding(finding, filePath, lineCount) {
     };
   }
 
-  if (typeof finding.understanding !== "string" || finding.understanding.trim().length === 0) {
-    return { error: "Each finding must include a non-empty 'understanding' string." };
-  }
-
   if (typeof finding.improvement !== "string" || finding.improvement.trim().length === 0) {
     return { error: "Each finding must include a non-empty 'improvement' string." };
   }
@@ -335,7 +341,7 @@ function normalizeFinding(finding, filePath, lineCount) {
       line: finding.line,
       severity: "advisory",
       category: finding.category,
-      understanding: finding.understanding.trim(),
+      understanding: overallUnderstanding.trim(),
       improvement: finding.improvement.trim(),
     },
   };

@@ -7,11 +7,11 @@ test("normalizeModelResponse accepts a valid incorrect-claim finding", () => {
   const result = normalizeModelResponse(
     JSON.stringify({
       summary: "One step could be clearer.",
+      overallUnderstanding: "The sequence appears to guide the reader through securing sensitive data in the app workflow.",
       findings: [
         {
           line: 6,
           category: "step_review",
-          understanding: "This step appears to move sensitive data into protected storage.",
           improvement: "Clarify what storage mechanism is used so the reader knows exactly how the secret is protected.",
         },
       ],
@@ -27,7 +27,7 @@ test("normalizeModelResponse accepts a valid incorrect-claim finding", () => {
       line: 6,
       severity: "advisory",
       category: "step_review",
-      understanding: "This step appears to move sensitive data into protected storage.",
+      understanding: "The sequence appears to guide the reader through securing sensitive data in the app workflow.",
       improvement: "Clarify what storage mechanism is used so the reader knows exactly how the secret is protected.",
     },
   ]);
@@ -37,11 +37,11 @@ test("normalizeModelResponse accepts a second valid step review finding", () => 
   const result = normalizeModelResponse(
     JSON.stringify({
       summary: "One step needs a better explanation.",
+      overallUnderstanding: "The sequence appears to configure the environment needed to run the demonstration safely.",
       findings: [
         {
           line: 6,
           category: "step_review",
-          understanding: "This step appears to configure a prerequisite for the demonstration.",
           improvement: "State the missing prerequisite explicitly so the reader can reproduce the step reliably.",
         },
       ],
@@ -57,7 +57,7 @@ test("normalizeModelResponse accepts a second valid step review finding", () => 
       line: 6,
       severity: "advisory",
       category: "step_review",
-      understanding: "This step appears to configure a prerequisite for the demonstration.",
+      understanding: "The sequence appears to configure the environment needed to run the demonstration safely.",
       improvement: "State the missing prerequisite explicitly so the reader can reproduce the step reliably.",
     },
   ]);
@@ -78,12 +78,10 @@ test("normalizeModelResponse rejects unknown categories", () => {
         {
           line: 6,
           category: "terminology",
-          message: "Wrong category for completeness review.",
-          evidence: "Feature 01 is a feature that protects sensitive data at rest.",
-          whyItMatters: "This category should not be accepted.",
-          suggestedRewrite: "Use an approved category.",
+          improvement: "Use an approved category.",
         },
       ],
+      overallUnderstanding: "The sequence appears to describe a feature workflow.",
     }),
     "playbooks/platform-feature-01.md",
     12
@@ -101,12 +99,10 @@ test("normalizeModelResponse rejects out-of-range line numbers", () => {
         {
           line: 40,
           category: "platform_mismatch",
-          message: "The playbook describes an iOS API in an iOS document.",
-          evidence: "Use the iOS Keychain to store the secret.",
-          whyItMatters: "Readers would be directed to the wrong platform mechanism.",
-          suggestedRewrite: "Replace the iOS-specific mechanism with the correct iOS one.",
+          improvement: "Replace the iOS-specific mechanism with the correct iOS one.",
         },
       ],
+      overallUnderstanding: "The sequence appears to configure a storage mechanism.",
     }),
     "playbooks/platform-feature-01.md",
     12
@@ -124,28 +120,28 @@ test("normalizeModelResponse rejects findings without understanding", () => {
         {
           line: 6,
           category: "step_review",
-          understanding: "",
           improvement: "Explain what the step is meant to accomplish.",
         },
       ],
+      overallUnderstanding: "",
     }),
     "playbooks/platform-feature-01.md",
     12
   );
 
   assert.equal(result.findings.length, 0);
-  assert.match(result.error, /understanding/i);
+  assert.match(result.error, /overallUnderstanding/i);
 });
 
 test("normalizeModelResponse rejects findings without improvement", () => {
   const result = normalizeModelResponse(
     JSON.stringify({
       summary: "Missing improvement.",
+      overallUnderstanding: "The sequence appears to secure the stored secret.",
       findings: [
         {
           line: 6,
           category: "step_review",
-          understanding: "This step appears to secure the stored secret.",
           improvement: "",
         },
       ],
