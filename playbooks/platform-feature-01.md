@@ -30,15 +30,13 @@ done
 
 4. In Apple Configurator, select your connected iOS device to manage apps on that device. Double-click the iOS device to open the device management screen. Click Add (+) → Apps from the top menu bar to search for and add the app through Apple Configurator.
 
-5. Select the target app to trigger Apple Configurator to download the IPA from Apple and attempt to install it on your iPhone. When the reinstall prompt appears, choose Replace to continue the installation flow.
-
-6. While Apple Configurator downloads and installs the app, the IPA file should temporarily appear in the below directory.
+5. Select the target app to trigger Apple Configurator to download the IPA from Apple and attempt to install it on your iPhone. When the reinstall prompt appears, choose Replace to continue the installation flow. While Apple Configurator downloads and installs the app, the IPA file should temporarily appear in the below directory.
 
 ```
 ~/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Assets/TemporaryItems/MobileApps/)
 ```
 
-7. After the script copies the IPA, open the ipa_tmp folder to confirm that the .ipa file was captured successfully.
+6. After the script copies the IPA, open the ipa_tmp folder to confirm that the .ipa file was captured successfully.
 
 Because the iOS platform provides IPA acquisition feature, your app is at risk of:
 - [platform-feature-01-risk-01](platform-feature-01-risk-01.md)
