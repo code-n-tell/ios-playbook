@@ -13,11 +13,11 @@ Set up a physical iOS device with the following configuration:
 | App Used      | Singpass  v26.0.4 |
 
 Perform the following steps to enable IPA acquisition:
-1. Install the target app on your iPhone to ensure the app is already associated with your Apple ID. Confirm that the Apple ID signed in on the iPhone is the same Apple ID used on your Mac.
+1. Install the target app on your iPhone to ensure the app is already associated with your Apple ID.
 
-2. Open Apple Configurator on your Mac to prepare for downloading the app IPA through Apple’s app installation flow.
+2. Open Apple Configurator on your Mac to prepare for downloading the app IPA through Apple’s app installation flow. Confirm that the Apple ID signed in on the iPhone is the same Apple ID used on your Mac.
 
-3. Open Terminal on your Mac to start a script that watches Apple Configurator’s temporary IPA cache folder and copies any downloaded .ipa file into a local ipa_tmp folder. Keep the Terminal script running to capture the IPA while Apple Configurator is downloading or installing the app. The IPA only appears temporarily in the cache folder, so the script continuously checks the folder and copies the file before it disappears.
+3. Open Terminal on your Mac and run a script to monitor Apple Configurator’s temporary IPA cache folder, copying any downloaded .ipa file to a local ipa_tmp folder.
 
 ```
 mkdir ipa_tmp
@@ -30,7 +30,7 @@ done
 
 4. In Apple Configurator, select your connected iOS device to manage apps on that device. Double-click the iOS device to open the device management screen. Click Add (+) → Apps from the top menu bar to search for and add the app through Apple Configurator.
 
-5. Select the target app to trigger Apple Configurator to download the IPA from Apple and attempt to install it on your iPhone. When the reinstall prompt appears, choose Replace to continue the installation flow. While Apple Configurator downloads and installs the app, the IPA file should temporarily appear in the below directory.
+5. Select the target app to trigger Apple Configurator to download the IPA from Apple and install it on your iPhone. When the reinstall prompt appears, choose Replace to continue the installation flow. While Apple Configurator downloads and installs the app, the IPA file should temporarily appear in the below directory.
 
 ```
 ~/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Assets/TemporaryItems/MobileApps/)
