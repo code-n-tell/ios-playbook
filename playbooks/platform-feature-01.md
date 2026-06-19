@@ -29,6 +29,8 @@ done
 ```
 
 4. In Apple Configurator, select your connected iOS device to manage apps on that device. Double-click the iOS device to open the device management screen. Click Add (+) → Apps from the top menu bar to search for and add the app through Apple Configurator.
+<img width="500" alt="apple-configurator" src="https://github.com/user-attachments/assets/e1915b4f-16e0-4eb8-bb5d-8420b2845c42" />
+<img width="500" alt="add-app-thru-apple-configurator" src="https://github.com/user-attachments/assets/2cada6c5-3e80-4a62-8d6a-4f68ff75114d" />
 
 5. Select the target app to trigger Apple Configurator to download the IPA from Apple and install it on your iPhone. When the reinstall prompt appears, choose Replace to continue the installation flow. While Apple Configurator downloads and installs the app, the IPA file should temporarily appear in the below directory.
 
