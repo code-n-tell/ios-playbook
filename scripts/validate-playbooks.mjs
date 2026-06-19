@@ -62,7 +62,6 @@ async function main() {
 
   for (const warning of warnings) {
     emitGitHubWarning(warning);
-    console.warn(`${warning.file}:${warning.line} WARN [${warning.rule}] Review warning: ${warning.message}`);
   }
 
   if (diagnostics.length === 0) {
@@ -74,10 +73,8 @@ async function main() {
 
   for (const diagnostic of diagnostics) {
     emitGitHubError(diagnostic);
-    console.error(`${diagnostic.file}:${diagnostic.line} FAIL [${diagnostic.rule}] Review check failed: ${diagnostic.message}`);
   }
 
-  console.error("");
   console.error(`The playbook review found ${diagnostics.length} blocking issue(s). Please address the items above before this submission moves forward.`);
   process.exitCode = 1;
 }
