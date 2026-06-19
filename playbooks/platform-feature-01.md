@@ -32,7 +32,11 @@ done
 
 5. Select the target app to trigger Apple Configurator to download the IPA from Apple and attempt to install it on your iPhone. When the reinstall prompt appears, choose Replace to continue the installation flow.
 
-6. While Apple Configurator downloads and installs the app, the IPA file should temporarily appear in (~/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Assets/TemporaryItems/MobileApps/)
+6. While Apple Configurator downloads and installs the app, the IPA file should temporarily appear in the below directory.
+
+```
+~/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Assets/TemporaryItems/MobileApps/)
+```
 
 7. After the script copies the IPA, open the ipa_tmp folder to confirm that the .ipa file was captured successfully.
 
