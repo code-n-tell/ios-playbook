@@ -63,9 +63,6 @@ async function main() {
   for (const warning of warnings) {
     emitGitHubWarning(warning);
     console.warn(`${warning.file}:${warning.line} WARN [${warning.rule}] Review warning: ${warning.message}`);
-    if (warning.howToFix) {
-      console.warn(`  Suggested next step: ${warning.howToFix}`);
-    }
   }
 
   if (diagnostics.length === 0) {
@@ -78,9 +75,6 @@ async function main() {
   for (const diagnostic of diagnostics) {
     emitGitHubError(diagnostic);
     console.error(`${diagnostic.file}:${diagnostic.line} FAIL [${diagnostic.rule}] Review check failed: ${diagnostic.message}`);
-    if (diagnostic.howToFix) {
-      console.error(`  Suggested next step: ${diagnostic.howToFix}`);
-    }
   }
 
   console.error("");
