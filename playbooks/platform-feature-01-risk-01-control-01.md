@@ -21,11 +21,7 @@ Your app can prevent the risk of an attacker from analysing the application's IP
 
 5. Prevent straightforward recovery of secret values by using Swift Confidential’s build-time obfuscation and runtime deobfuscation process. Depending on the configuration, the plugin may use a random mix of `shuffle`, `encrypt`, `compress`, and `nonce` steps. `shuffle` rearranges bytes and stores obfuscated index metadata, `encrypt` encrypts secret bytes using AES-GCM or ChaChaPoly, `compress` compresses the data and hides compression magic bytes, and `nonce` uses a random number to hide or deobfuscate metadata such as keys, indexes, and magic bytes.
 
-6. Prevent simple recovery of encrypted secret values by storing encryption keys as obfuscated key bytes and recovering them only at runtime by XORing the key bytes with nonce bytes. The formulae used is shown below.
-
-``` 
-byte ^ nonceBytes[index % nonceByteWidth]
-```
+6. Prevent simple recovery of encrypted secret values by storing encryption keys as obfuscated key bytes and recovering them only at runtime by XORing the key bytes with nonce bytes. The formulae used is shown below ``` byte ^ nonceBytes[index % nonceByteWidth]```.
 
 7. Detect remaining plaintext credential exposure by rebuilding the application, extracting the IPA, and checking the compiled binary using `strings` and static analysis tools to verify that the original plaintext credential values no longer appear directly in the binary.
 
