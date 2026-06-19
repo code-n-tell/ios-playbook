@@ -33,6 +33,140 @@ test("normalizeModelResponse accepts a valid advisory finding", () => {
   ]);
 });
 
+test("normalizeModelResponse accepts a feature-name advisory finding", () => {
+  const result = normalizeModelResponse(
+    JSON.stringify({
+      summary: "The feature name can be more concise.",
+      findings: [
+        {
+          line: 3,
+          category: "feature_name",
+          message: "The feature name is longer than needed and would be easier to scan if it were shorter.",
+          suggestedRewrite: "The iOS platform provides Secure Storage feature.",
+        },
+      ],
+    }),
+    "playbooks/platform-feature-01.md",
+    12
+  );
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.findings, [
+    {
+      file: "playbooks/platform-feature-01.md",
+      line: 3,
+      severity: "advisory",
+      category: "feature_name",
+      message: "The feature name is longer than needed and would be easier to scan if it were shorter.",
+      suggestedRewrite: "The iOS platform provides Secure Storage feature.",
+    },
+  ]);
+});
+
+test("normalizeModelResponse accepts an action-oriented demonstration finding", () => {
+  const result = normalizeModelResponse(
+    JSON.stringify({
+      summary: "One demonstration step should begin with a clearer verb.",
+      findings: [
+        {
+          line: 12,
+          category: "step_action",
+          message: "The step does not begin with a strong action verb, which makes the instruction harder to follow.",
+          suggestedRewrite: "1. Update the app configuration to enable Secure Storage for secrets saved on the device",
+        },
+      ],
+    }),
+    "playbooks/platform-feature-01.md",
+    12
+  );
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.findings, [
+    {
+      file: "playbooks/platform-feature-01.md",
+      line: 12,
+      severity: "advisory",
+      category: "step_action",
+      message: "The step does not begin with a strong action verb, which makes the instruction harder to follow.",
+      suggestedRewrite: "1. Update the app configuration to enable Secure Storage for secrets saved on the device",
+    },
+  ]);
+});
+
+test("normalizeModelResponse accepts an action-oriented risk demonstration finding", () => {
+  const result = normalizeModelResponse(
+    JSON.stringify({
+      summary: "One risk demonstration step should use a more consistent action pattern.",
+      findings: [
+        {
+          line: 12,
+          category: "step_action",
+          message: "The risk demonstration step would be easier to follow if it started with a direct action verb and stated the objective.",
+          suggestedRewrite: "1. Open the exported backup file to extract the stored secret",
+        },
+      ],
+    }),
+    "playbooks/platform-feature-01-risk-01.md",
+    14
+  );
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.findings, [
+    {
+      file: "playbooks/platform-feature-01-risk-01.md",
+      line: 12,
+      severity: "advisory",
+      category: "step_action",
+      message: "The risk demonstration step would be easier to follow if it started with a direct action verb and stated the objective.",
+      suggestedRewrite: "1. Open the exported backup file to extract the stored secret",
+    },
+  ]);
+});
+
+test("normalizeModelResponse accepts a control-step rewrite finding", () => {
+  const result = normalizeModelResponse(
+    JSON.stringify({
+      summary: "The control steps can use a more consistent detect/prevent pattern.",
+      findings: [
+        {
+          line: 3,
+          category: "step_action",
+          message: "The first control step would be easier to scan if it used a direct detect-by pattern.",
+          suggestedRewrite: "1. Detect exported backup files by scanning the app data directory before processing secrets",
+        },
+        {
+          line: 4,
+          category: "step_action",
+          message: "The second control step would be easier to scan if it used a direct prevent-by pattern.",
+          suggestedRewrite: "2. Prevent secret extraction by encrypting backup data with a device-bound key",
+        },
+      ],
+    }),
+    "playbooks/platform-feature-01-risk-01-control-01.md",
+    6
+  );
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.findings, [
+    {
+      file: "playbooks/platform-feature-01-risk-01-control-01.md",
+      line: 3,
+      severity: "advisory",
+      category: "step_action",
+      message: "The first control step would be easier to scan if it used a direct detect-by pattern.",
+      suggestedRewrite: "1. Detect exported backup files by scanning the app data directory before processing secrets",
+    },
+    {
+      file: "playbooks/platform-feature-01-risk-01-control-01.md",
+      line: 4,
+      severity: "advisory",
+      category: "step_action",
+      message: "The second control step would be easier to scan if it used a direct prevent-by pattern.",
+      suggestedRewrite: "2. Prevent secret extraction by encrypting backup data with a device-bound key",
+    },
+  ]);
+});
+
 test("normalizeModelResponse rejects malformed JSON", () => {
   const result = normalizeModelResponse("{not json}", "playbooks/platform-feature-01.md", 12);
 
@@ -89,7 +223,8 @@ Perform the following steps to enable Secure Storage:
   assert.doesNotMatch(content, /^## /m);
   assert.doesNotMatch(content, /^### /m);
   assert.doesNotMatch(content, /^\|/m);
-  assert.match(content, /The iOS platform provides Secure Storage feature\./);
-  assert.match(content, /Set up demo app with the following configuration:/);
-  assert.match(content, /Perform the following steps to enable Secure Storage:/);
+  assert.match(content, /^3: The iOS platform provides Secure Storage feature\.$/m);
+  assert.match(content, /^7: Set up demo app with the following configuration:$/m);
+  assert.match(content, /^11: Perform the following steps to enable Secure Storage:$/m);
+  assert.match(content, /^12: 1\. Update the app to do the needed thing for security$/m);
 });

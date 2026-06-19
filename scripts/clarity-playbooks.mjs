@@ -12,13 +12,18 @@ const ALLOWED_CATEGORIES = new Set([
   "ambiguity",
   "flow",
   "demonstration",
+  "feature_name",
+  "step_action",
   "terminology",
   "rewrite",
 ]);
 const CLARITY_RUBRIC = [
   "ambiguous or vague wording",
   "weak section-to-section flow",
+  "feature names in Description that are too long, awkward, or not concise enough for human readers",
   "hard-to-follow demonstration steps",
+  "numbered demonstration steps that should start with a clear action verb and state the objective",
+  "control steps that should follow a consistent detect/prevent instruction pattern",
   "inconsistent terminology within a file",
   "concrete rewrite suggestions for unclear sentences",
 ];
@@ -166,6 +171,10 @@ function buildSystemPrompt() {
     "You review iOS playbook Markdown files for clarity only.",
     "Do not check format compliance, policy compliance, security completeness, or missing required template sections.",
     "Report only advisory clarity findings that help an author rewrite the playbook for human readers.",
+    "For feature playbooks, you may suggest a more concise feature name only when the current feature name is vague, awkward, or longer than 3 words.",
+    "When you suggest a feature name, keep it to 1 to 3 words and make sure it still matches the described capability.",
+    "For numbered demonstration steps in feature and risk playbooks, prefer rewrites that begin with a clear action verb and explain the objective in plain language.",
+    "For control playbooks, prefer rewrites that keep the two numbered steps in a consistent pattern such as 'Detect <something> by <method>' and 'Prevent <something> by <method>'.",
     `Use only these categories: ${Array.from(ALLOWED_CATEGORIES).join(", ")}.`,
     `Limit findings to at most ${MAX_FINDINGS_PER_FILE}.`,
     "If the playbook is already clear, return an empty findings array.",
@@ -180,11 +189,14 @@ function buildUserPrompt(filePath, type, raw) {
     "Review this playbook for clarity using the rubric below.",
     "Exclude template headings, section headings, filenames, and Markdown tables from your review.",
     "Focus only on the remaining prose and numbered instruction lines.",
+    "For feature playbooks, pay special attention to whether the Description uses a concise feature name.",
+    "For feature and risk playbooks, pay special attention to whether each numbered Demonstration step starts with a clear action verb and follows a consistent pattern such as 'Open X to do Y'.",
+    "For control playbooks, pay special attention to whether the two numbered steps follow a consistent detect/prevent pattern such as 'Detect X by Y' and 'Prevent X by Y'.",
     `Rubric: ${CLARITY_RUBRIC.join("; ")}.`,
     `File: ${filePath}`,
     `Playbook type: ${type}`,
     "",
-    "Playbook content:",
+    "Playbook content with original line numbers:",
     raw,
   ].join("\n");
 }
@@ -194,7 +206,7 @@ export function extractClarityContent(raw) {
   const filteredLines = [];
   let insideTable = false;
 
-  for (const line of lines) {
+  for (const [index, line] of lines.entries()) {
     const trimmed = line.trim();
 
     if (trimmed.startsWith("|")) {
@@ -218,7 +230,7 @@ export function extractClarityContent(raw) {
       continue;
     }
 
-    filteredLines.push(line);
+    filteredLines.push(`${index + 1}: ${trimmed}`);
   }
 
   return filteredLines.join("\n");
