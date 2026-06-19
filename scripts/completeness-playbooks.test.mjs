@@ -1,7 +1,38 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { collectStaticCompletenessFindings, extractCompletenessContent, normalizeModelResponse } from "./completeness-playbooks.mjs";
+import {
+  buildCompletenessPrompts,
+  collectStaticCompletenessFindings,
+  extractCompletenessContent,
+  normalizeModelResponse,
+} from "./completeness-playbooks.mjs";
+
+test("buildCompletenessPrompts gives feature-specific guidance", () => {
+  const prompts = buildCompletenessPrompts("playbooks/platform-feature-01.md", "feature", "12: 1. Step");
+
+  assert.match(prompts.system, /experienced iOS software engineer/i);
+  assert.match(prompts.system, /feature flow/i);
+  assert.match(prompts.user, /feature-enablement flow/i);
+  assert.doesNotMatch(prompts.system, /attacker perspective/i);
+});
+
+test("buildCompletenessPrompts gives risk-specific guidance", () => {
+  const prompts = buildCompletenessPrompts("playbooks/platform-feature-01-risk-01.md", "risk", "12: 1. Step");
+
+  assert.match(prompts.system, /experienced iOS security engineer/i);
+  assert.match(prompts.system, /attacker perspective/i);
+  assert.match(prompts.user, /risk-demonstration flow/i);
+});
+
+test("buildCompletenessPrompts gives control-specific guidance", () => {
+  const prompts = buildCompletenessPrompts("playbooks/platform-feature-01-risk-01-control-01.md", "control", "12: 1. Step");
+
+  assert.match(prompts.system, /defender mindset/i);
+  assert.match(prompts.system, /defender perspective/i);
+  assert.match(prompts.user, /defensive control flow/i);
+  assert.doesNotMatch(prompts.system, /attacker perspective/i);
+});
 
 test("normalizeModelResponse accepts a valid incorrect-claim finding", () => {
   const result = normalizeModelResponse(

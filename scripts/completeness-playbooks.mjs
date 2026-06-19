@@ -89,6 +89,7 @@ async function reviewFileWithGitHubModels(filePath) {
   const type = inferTypeFromFilename(path.basename(filePath, ".md")) ?? "unknown";
   const completenessContent = extractCompletenessContent(raw);
   const staticFindings = collectStaticCompletenessFindings(filePath, type, lines);
+  const prompts = buildCompletenessPrompts(filePath, type, completenessContent);
 
   const requestBody = {
     model: MODEL_NAME,
@@ -96,11 +97,11 @@ async function reviewFileWithGitHubModels(filePath) {
     messages: [
       {
         role: "system",
-        content: buildSystemPrompt(),
+        content: prompts.system,
       },
       {
         role: "user",
-        content: buildUserPrompt(filePath, type, completenessContent),
+        content: prompts.user,
       },
     ],
   };
@@ -164,13 +165,21 @@ async function reviewFileWithGitHubModels(filePath) {
   };
 }
 
-function buildSystemPrompt() {
+export function buildCompletenessPrompts(filePath, type, raw) {
+  return {
+    system: buildSystemPrompt(type),
+    user: buildUserPrompt(filePath, type, raw),
+  };
+}
+
+function buildSystemPrompt(type) {
   return [
     "You review iOS playbook Markdown files for numbered-step technical completeness only.",
     "Do not review descriptions, goals, references, screenshots, formatting, section completeness, or prose style.",
     "Review the numbered instruction lines as one end-to-end sequence.",
     "When uncertain, return an empty findings array.",
     "Do not speculate about implementation details that are not stated in the numbered steps.",
+    ...buildTypeSpecificSystemGuidance(type),
     `Use only these categories: ${Array.from(CORRECTNESS_CATEGORIES).join(", ")}.`,
     `Limit findings to at most ${MAX_FINDINGS_PER_FILE}.`,
     "Return strict JSON only with this shape:",
@@ -187,6 +196,7 @@ function buildUserPrompt(filePath, type, raw) {
     "Ignore all non-numbered lines. Focus only on the numbered instruction lines that remain in the supplied content.",
     "First, form one overall understanding of what the full numbered-step sequence is trying to do.",
     "Then, report one or more specific things that could be better in the technical flow.",
+    ...buildTypeSpecificUserGuidance(type),
     `Rubric: ${COMPLETENESS_RUBRIC.join("; ")}.`,
     `File: ${filePath}`,
     `Playbook type: ${type}`,
@@ -194,6 +204,57 @@ function buildUserPrompt(filePath, type, raw) {
     "Playbook content with original line numbers:",
     raw,
   ].join("\n");
+}
+
+function buildTypeSpecificSystemGuidance(type) {
+  if (type === "feature") {
+    return [
+      "You are acting as an experienced iOS software engineer.",
+      "Your job is to understand the key implementation goal of the full feature flow and identify what else could be added to achieve that goal with less friction.",
+    ];
+  }
+
+  if (type === "risk") {
+    return [
+      "You are acting as an experienced iOS security engineer.",
+      "Your job is to understand the key goal of the full risk flow from an attacker perspective and identify what else could be added to achieve that goal with less friction.",
+    ];
+  }
+
+  if (type === "control") {
+    return [
+      "You are acting as an experienced iOS software engineer with a defender mindset.",
+      "Your job is to understand the key goal of the full control flow from a defender perspective and identify what else could be added to achieve that goal with less friction.",
+    ];
+  }
+
+  return [
+    "Use a general iOS engineering perspective when the playbook type is unknown.",
+  ];
+}
+
+function buildTypeSpecificUserGuidance(type) {
+  if (type === "feature") {
+    return [
+      "Treat the sequence as a feature-enablement flow and assess it from an iOS software engineer perspective.",
+    ];
+  }
+
+  if (type === "risk") {
+    return [
+      "Treat the sequence as a risk-demonstration flow and assess it from an attacker perspective using iOS security engineering judgment.",
+    ];
+  }
+
+  if (type === "control") {
+    return [
+      "Treat the sequence as a defensive control flow and assess it from a defender perspective using iOS software engineering judgment.",
+    ];
+  }
+
+  return [
+    "Use a general iOS engineering perspective because the playbook type is unknown.",
+  ];
 }
 
 export function extractCompletenessContent(raw) {
