@@ -164,6 +164,19 @@ function validateStructure(filePath, lines, passLogs) {
 }
 
 function validateFeatureFile(filePath, basename, items, passLogs) {
+  const levelThreeHeadings = items.filter((item) => item.text.startsWith("### "));
+  if (levelThreeHeadings.length > 3) {
+    return [
+      makeDiagnostic(
+        filePath,
+        levelThreeHeadings[3].line,
+        "feature.heading_count",
+        `Feature playbooks must contain exactly 3 level-3 section headings, but this document contains ${levelThreeHeadings.length}. The extra heading found here is '${levelThreeHeadings[3].text}'.`,
+        "Remove the extra '###' section heading so the feature playbook contains only '### Description', '### Additional context', and '### Demonstration'."
+      ),
+    ];
+  }
+
   const state = createParser(filePath, items, passLogs);
 
   // Feature playbooks describe a platform capability, explain its context,
