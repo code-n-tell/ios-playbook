@@ -186,6 +186,9 @@ function buildSystemPrompt(type) {
     '{"summary":"short summary","overallUnderstanding":"what the full numbered-step sequence appears to do","findings":[{"line":12,"category":"step_review","improvement":"what could be better"}]}',
     "There must be exactly one overallUnderstanding string for the whole sequence.",
     "Each finding should describe one missing or weak part of the overall flow, not repeat the entire understanding.",
+    "Write the overallUnderstanding so it can be rendered as: 'As a <role>, I think the goal of this sequence is <interpretation>.'",
+    "Write each improvement so it can be rendered as: 'As a <role>, I suggest <suggestion> to help me follow the sequence without friction.'",
+    "Do not include the role phrase yourself inside overallUnderstanding or improvement; provide only the interpretation and suggestion content.",
     "Do not wrap the JSON in Markdown fences.",
   ].join("\n");
 }
@@ -300,6 +303,7 @@ export function collectStaticCompletenessFindings(filePath, type, lines) {
       line: index + 1,
       severity: "advisory",
       category: "demo_inconsistency",
+      role: getReviewerRole(type),
       understanding: "This control step is intended to describe a control action, but it does not currently start with 'Detect' or 'Prevent'.",
       improvement: "Rewrite this step so it starts with 'Detect' or 'Prevent' while preserving the current meaning.",
     });
@@ -354,12 +358,14 @@ export function normalizeModelResponse(rawContent, filePath, lineCount) {
   }
 
   const findings = [];
+  const type = inferTypeFromFilename(path.basename(filePath, ".md")) ?? "unknown";
+  const role = getReviewerRole(type);
   for (const [index, finding] of parsed.findings.entries()) {
     if (findings.length >= MAX_FINDINGS_PER_FILE) {
       break;
     }
 
-    const normalized = normalizeFinding(finding, filePath, lineCount, parsed.overallUnderstanding);
+    const normalized = normalizeFinding(finding, filePath, lineCount, parsed.overallUnderstanding, role);
     if (normalized.error) {
       return {
         findings: [],
@@ -373,7 +379,7 @@ export function normalizeModelResponse(rawContent, filePath, lineCount) {
   return { findings, error: null };
 }
 
-function normalizeFinding(finding, filePath, lineCount, overallUnderstanding) {
+function normalizeFinding(finding, filePath, lineCount, overallUnderstanding, role) {
   if (!finding || typeof finding !== "object" || Array.isArray(finding)) {
     return { error: "Each finding must be a JSON object." };
   }
@@ -402,10 +408,27 @@ function normalizeFinding(finding, filePath, lineCount, overallUnderstanding) {
       line: finding.line,
       severity: "advisory",
       category: finding.category,
+      role,
       understanding: overallUnderstanding.trim(),
       improvement: finding.improvement.trim(),
     },
   };
+}
+
+function getReviewerRole(type) {
+  if (type === "feature") {
+    return "iOS software engineer";
+  }
+
+  if (type === "risk") {
+    return "iOS security engineer";
+  }
+
+  if (type === "control") {
+    return "iOS software engineer with a defender perspective";
+  }
+
+  return "iOS engineer";
 }
 
 function extractAssistantContent(payload) {
@@ -492,8 +515,10 @@ function readPathsFromStdin() {
   });
 }
 
-function emitGitHubWarning({ file, line, severity, category, understanding, improvement }) {
-  const escapedMessage = escapeWorkflowValue(`[${severity}/${category}] Understanding: ${understanding} What can be better: ${improvement}`);
+function emitGitHubWarning({ file, line, severity, category, role, understanding, improvement }) {
+  const escapedMessage = escapeWorkflowValue(
+    `[${severity}/${category}] Understanding: As a ${role}, I think the goal of this sequence is ${understanding}. Improvements: As a ${role}, I suggest ${improvement} to help me follow the sequence without friction.`
+  );
   console.log(`::warning file=${file},line=${line},title=Playbook technical completeness::${escapedMessage}`);
 }
 
