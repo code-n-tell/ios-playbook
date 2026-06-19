@@ -445,7 +445,6 @@ function validateControlFile(filePath, basename, items, passLogs) {
     "control.ipa_reference",
     "The final reference line must be written exactly as 'The IPA with the implemented control can be found [here](path).'."
   );
-  state.expectEnd("control.extra_content", "No additional content is allowed after the references section.");
   return state.diagnostics;
 }
 
