@@ -34,5 +34,5 @@ Perform the following steps to enable IPA acquisition:
 <img src="../attachments/IPA_Acquisition_ss6.png" width="500" alt="Alt text">
 
 Because the iOS platform provides IPA acquisition feature, your app is at risk of:
-- [Platform_Feature-01-Risk-01](Platform_Feature-01-Risk-01.md)
-- [Platform_Feature-01-Risk-02](Platform_Feature-01-Risk-02.md)
+- [platform-feature-01-risk-01](platform-feature-01-risk-01.md)
+- [platform-feature-01-risk-02](platform-feature-01-risk-02.md)
