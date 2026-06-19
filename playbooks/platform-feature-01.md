@@ -1,7 +1,7 @@
-## platform-feature-01 
+## platform-feature-01
 ### Description
 The iOS platform provides IPA acquisition feature.
-### Additional Context
+### Additional context
 IPA acquisition is a feature that allows an IPA file to be obtained from Apple Configurator on macOS, enabling security testers to inspect the application’s structure, configuration, permissions, and entitlements.
 ### Demonstration
 Set up a physical iOS device with the following configuration:
