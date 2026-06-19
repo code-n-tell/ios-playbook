@@ -257,7 +257,8 @@ function validateFeatureFile(filePath, basename, items, passLogs) {
   state.expectNumberedList(
     /^(\d+)\. .+ to .+$/,
     "feature.demo_steps",
-    "Each demonstration step must follow the approved format '1. <action_verb> to <objective>'."
+    "Each demonstration step must follow the approved format '1. <action_verb> to <objective>'.",
+    { allowImageLines: true }
   );
 
   const risksIntro = state.find(
@@ -393,7 +394,8 @@ function validateRiskFile(filePath, basename, items, passLogs) {
   state.expectNumberedList(
     /^(\d+)\. .+ to .+$/,
     "risk.demo_steps",
-    "Each demonstration step must follow the approved format '1. <action_verb> to <objective>'."
+    "Each demonstration step must follow the approved format '1. <action_verb> to <objective>'.",
+    { allowImageLines: true }
   );
   return state.diagnostics;
 }
@@ -428,22 +430,16 @@ function validateControlFile(filePath, basename, items, passLogs) {
     "control.intro",
     "The control introduction must be written exactly as 'Your app can prevent the risk of an attacker <technique> by taking the following steps:'."
   );
-  state.expect(
-    /^1\. .+$/,
-    "control.detect_step",
-    "The first control step must be a numbered item written as '1. <instructions>'."
+  state.expectNumberedList(
+    /^(\d+)\. .+$/,
+    "control.steps",
+    "Each control step must be a numbered item written as '1. <instructions>'."
   );
-  state.expect(
-    /^2\. .+$/,
-    "control.prevent_step",
-    "The second control step must be a numbered item written as '2. <instructions>'."
-  );
-  state.expect(
+  state.find(
     /^The APK with the implemented control can be found \[here\]\((.+)\)\.$/,
     "control.apk_link",
-    "The final line must be written exactly as 'The APK with the implemented control can be found [here](path).'."
+    "The APK line must be written exactly as 'The APK with the implemented control can be found [here](path).' and must appear after the numbered control steps."
   );
-  state.expectEnd("control.extra_content", "No additional content is allowed after the APK link.");
   return state.diagnostics;
 }
 
@@ -586,7 +582,8 @@ function createParser(filePath, items, passLogs) {
     // Numbered-list check:
     // - Pass: at least one numbered item exists and every item matches the rule.
     // - Fail: the list is missing or any item breaks the agreed sentence pattern.
-    expectNumberedList(itemPattern, rule, message) {
+    expectNumberedList(itemPattern, rule, message, options = {}) {
+      const { allowImageLines = false } = options;
       const start = this.current();
       if (!start || !/^\d+\.\s+/.test(start.text)) {
         this.error(
@@ -599,21 +596,32 @@ function createParser(filePath, items, passLogs) {
       }
 
       let count = 0;
-      while (this.current() && /^\d+\.\s+/.test(this.current().text)) {
+      while (this.current()) {
         const item = this.current();
-        if (!itemPattern.test(item.text)) {
-          this.error(
-            item.line,
-            rule,
-            `${message} The review found '${item.text}' on this line instead.`,
-            `Rewrite line ${item.line} so it follows the required numbered-list format.`
-          );
-          return null;
+        if (/^\d+\.\s+/.test(item.text)) {
+          if (!itemPattern.test(item.text)) {
+            this.error(
+              item.line,
+              rule,
+              `${message} The review found '${item.text}' on this line instead.`,
+              `Rewrite line ${item.line} so it follows the required numbered-list format.`
+            );
+            return null;
+          }
+
+          count += 1;
+          this.pass(item.line, `Numbered list item ${count} passed the '${rule}' review check.`);
+          this.index += 1;
+          continue;
         }
 
-        count += 1;
-        this.pass(item.line, `Numbered list item ${count} passed the '${rule}' review check.`);
-        this.index += 1;
+        if (allowImageLines && /^<img\b.+>$/.test(item.text)) {
+          this.pass(item.line, `Supporting image line ${count > 0 ? `after item ${count}` : "within the list block"} is allowed for '${rule}'.`);
+          this.index += 1;
+          continue;
+        }
+
+        break;
       }
 
       return true;

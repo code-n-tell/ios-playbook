@@ -147,6 +147,55 @@ test("each numbered demonstration step is validated for a feature playbook", () 
   assert.match(result.stdout, /Numbered list item 2 passed the 'feature\.demo_steps'/);
 });
 
+test("feature playbooks allow image lines between numbered demonstration steps", () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ios-playbook-validator-"));
+  const filePath = path.join(tempRoot, "platform-feature-01.md");
+
+  fs.writeFileSync(
+    filePath,
+    [
+      "## platform-feature-01",
+      "",
+      "### Description",
+      "",
+      "The iOS platform provides Secure Storage feature.",
+      "",
+      "### Additional context",
+      "",
+      "Secure Storage is a feature that protects application secrets stored on the device.",
+      "",
+      "### Demonstration",
+      "",
+      "Set up demo app with the following configuration:",
+      "",
+      "| Configuration | Detail |",
+      "| -------- | ------- |",
+      "",
+      "Perform the following steps to enable Secure Storage:",
+      "",
+      "1. Open the project settings to enable encrypted storage",
+      "",
+      "<img src=\"../attachments/feature-step-1.png\" width=\"400\" alt=\"Alt text\">",
+      "",
+      "2. Update the app configuration to store secrets in the encrypted container",
+      "",
+      "Because the iOS platform provides Secure Storage feature, your app is at risk of:",
+      "",
+      "- [platform-feature-01-risk-01](platform-feature-01-risk-01.md)",
+      "",
+    ].join("\n"),
+    "utf8"
+  );
+
+  const result = runValidator([filePath]);
+
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /feature\.demo_steps/);
+  assert.match(result.stdout, /Supporting image line after item 1 is allowed for 'feature\.demo_steps'/);
+});
+
 test("the validator reports multiple feature issues from one file", () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ios-playbook-validator-"));
   const filePath = path.join(tempRoot, "platform-feature-01.md");
@@ -193,7 +242,7 @@ test("the validator reports multiple feature issues from one file", () => {
   assert.match(result.stdout, /feature\.related_risks_link_match/);
 });
 
-test("control playbooks accept numbered steps without requiring 'by' phrasing", () => {
+test("control playbooks accept multiple numbered steps", () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ios-playbook-validator-"));
   const filePath = path.join(tempRoot, "platform-feature-01-risk-01-control-01.md");
 
@@ -208,6 +257,8 @@ test("control playbooks accept numbered steps without requiring 'by' phrasing", 
       "",
       "2. Prevent secret exposure with device-bound encryption checks.",
       "",
+      "3. Prevent static extraction by obfuscating generated secret material.",
+      "",
       "The APK with the implemented control can be found [here](https://example.com/control.apk).",
       "",
     ].join("\n"),
@@ -219,9 +270,10 @@ test("control playbooks accept numbered steps without requiring 'by' phrasing", 
   fs.rmSync(tempRoot, { recursive: true, force: true });
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /control\.detect_step/);
-  assert.match(result.stdout, /control\.prevent_step/);
-  assert.doesNotMatch(result.stderr, /Detect by|Prevent by/);
+  assert.match(result.stdout, /Numbered list item 1 passed the 'control\.steps'/);
+  assert.match(result.stdout, /Numbered list item 2 passed the 'control\.steps'/);
+  assert.match(result.stdout, /Numbered list item 3 passed the 'control\.steps'/);
+  assert.match(result.stdout, /control\.apk_link/);
 });
 
 test("risk playbooks allow additional content after the numbered demonstration steps", () => {
@@ -267,6 +319,52 @@ test("risk playbooks allow additional content after the numbered demonstration s
   assert.equal(result.status, 0);
   assert.match(result.stdout, /risk\.demo_steps/);
   assert.doesNotMatch(result.stdout, /risk\.extra_content/);
+});
+
+test("risk playbooks allow image lines between numbered demonstration steps", () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ios-playbook-validator-"));
+  const filePath = path.join(tempRoot, "platform-feature-01-risk-01.md");
+
+  fs.writeFileSync(
+    filePath,
+    [
+      "## platform-feature-01-risk-01",
+      "",
+      "### Description",
+      "",
+      "Because the iOS platform provides Secure Storage feature, your application is at risk of an attacker extracting secrets.",
+      "",
+      "### Goal",
+      "",
+      "As a result, this could lead to credential disclosure.",
+      "",
+      "### Demonstration",
+      "",
+      "Set up demo app with the following configuration:",
+      "",
+      "| Configuration | Detail |",
+      "| -------- | ------- |",
+      "| Build variant | Debug |",
+      "",
+      "Perform the following steps to demonstrate the risk of an attacker extracting secrets:",
+      "",
+      "1. Open the backup directory to locate the exported application data",
+      "",
+      "<img src=\"../attachments/risk-step-1.png\" width=\"400\" alt=\"Alt text\">",
+      "",
+      "2. Inspect the exported bundle to identify embedded secrets",
+      "",
+    ].join("\n"),
+    "utf8"
+  );
+
+  const result = runValidator([filePath]);
+
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /risk\.demo_steps/);
+  assert.match(result.stdout, /Supporting image line after item 1 is allowed for 'risk\.demo_steps'/);
 });
 
 test("risk goal sentences allow emphasized tactics with a short explanation", () => {
