@@ -2,7 +2,7 @@
 ### Description
 Because the iOS platform provides IPA acquisition feature, your application is at risk of an attacker analysing the application's IPA file.
 ### Goal
-As a result, this could lead to _**discovery** - attackers figuring out the IPA’s vulnerabilities._
+As a result, this could lead to _**discovery** - attackers figuring out the IPA’s vulnerabilities._
 ### Demonstration
 Set up a workstation with the following configuration:
 
