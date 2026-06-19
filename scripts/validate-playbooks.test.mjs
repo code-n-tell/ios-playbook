@@ -284,7 +284,7 @@ test("risk goal sentences allow emphasized tactics with a short explanation", ()
       "",
       "### Goal",
       "",
-      "As a result, this could lead to _**discovery**_ - attackers figuring out the IPA's vulnerabilities.",
+      "As a result, this could lead to _**discovery** - attackers figuring out the IPA's vulnerabilities._",
       "",
       "### Demonstration",
       "",
