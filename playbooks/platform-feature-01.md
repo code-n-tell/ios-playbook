@@ -22,7 +22,7 @@ Perform the following steps to enable IPA acquisition:
 ```
 mkdir ipa_tmp
 
-while true; do                      
+while true; do
 	find ~/Library/Group\ Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Assets/TemporaryItems/MobileApps/ -name "*.ipa" -exec cp {} ipa_tmp/ \;
 	sleep 0.3
 done
