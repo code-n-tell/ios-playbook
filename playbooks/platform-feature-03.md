@@ -24,15 +24,15 @@ Open the target app on the iPhone and capture the app interface using one of the
 | Screen Recording  | Swipe down from the top-right corner of the screen to open `Control Centre`, then tap the Screen Recording button (a solid dot inside a circle).                                                                                                                                                                          |
 | AirPlay Mirroring | On a macOS workstation, open `System Settings` and search for `AirPlay Receiver`. Turn `AirPlay Receiver` on and set `Allow AirPlay` for `to Everyone`. On the iPhone, open `Control Centre`, tap `Screen Mirroring`, and select the macOS workstation. View and capture the mirrored display from the macOS workstation. |
 
-<img src="attachments/feature4_ss1.png" width="400" alt="Alt text">
+<img src="attachments/feature3_ss1.png" width="400" alt="Alt text">
 
 *Screenshot shows the correct setting configured for Airplay*
 
-<img src="attachments/feature4_ss2.png" width="400" alt="Alt text">
+<img src="attachments/feature3_ss2.png" width="400" alt="Alt text">
 
 *Screenshot highlights the screen mirroring icon*
 
-<img src="attachments/feature4_ss3.png" width="400" alt="Alt text">
+<img src="attachments/feature3_ss3.png" width="400" alt="Alt text">
 
 *Screenshot shows list of targets for screen mirroring*
 

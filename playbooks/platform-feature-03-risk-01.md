@@ -6,7 +6,7 @@ Capture on-screen content
 
 ### Description
 
-Capture on-screen content by recording the app display during an authorised screen recording session to collect sensitive information visible within the app (MITRE ATT&CK: TA0035).
+Capture on-screen content by recording the app display during an authorised screen recording session to collect sensitive information visible within the app (MITRE ATT&CK: ***Collection*** - TA0035).
 
 ### Demonstration
 #### 01. Prepare the environment
@@ -36,11 +36,11 @@ override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBuf
 
 Tap `Start App Screen Recording`. When the system prompt appears, tap `Start Broadcast` to authorise and begin the recording.
 
-<img src="attachments/feature4_risk1_ss1.png" width="400" alt="Replay Recorder app login screen">
+<img src="attachments/feature3_risk1_ss1.png" width="400" alt="Replay Recorder app login screen">
 
 *Screenshot shows notification from the app of the last screenshot saved*
 
-<img src="attachments/feature4_risk1_ss2.png" width="400" alt="Screen recording start broadcast prompt">
+<img src="attachments/feature3_risk1_ss2.png" width="400" alt="Screen recording start broadcast prompt">
 
 *Screenshot shows screen mirroring popup*
 
@@ -52,11 +52,11 @@ Switch to the target app and enter or display information while the recording co
 
 Stop the recording and review the recorded images and videos. Check whether the captured content includes sensitive information displayed in the target app.
 
-<img src="attachments/feature4_risk1_ss3.png" width="400" alt="Sensitive information visible in screenshot">
+<img src="attachments/feature3_risk1_ss3.png" width="400" alt="Sensitive information visible in screenshot">
 
 *Screenshot shows visible username and blanked out password fields when both fields are filled*
 
-<img src="attachments/feature4_risk1_ss4.png" width="400" alt="Captured screenshots and recordings saved in app container">
+<img src="attachments/feature3_risk1_ss4.png" width="400" alt="Captured screenshots and recordings saved in app container">
 
 *Screenshot shows list of screen recording and screenshots taken by the malicious app*
 

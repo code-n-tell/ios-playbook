@@ -13,9 +13,12 @@ Protect sensitive text fields by using SecureField for sensitive inputs to preve
 
 Replace standard `TextField` inputs for sensitive fields like `Password` with `SecureField`. This automatically prevents the password from showing up in screen recordings, screen shares, or screenshots.
 
-<img src="attachments/feature3_risk1_control1_ss1.png" width="400" alt="Alt text">
+``` swift
+SecureField("Password", text: $password)
+	.textFieldStyle(.roundedBorder)
+```
 
-*Screenshot shows implementation of `SecureField` on the `Password` input*
+*Code block shows implementation of `SecureField` on the `Password` input*
 
 References:
 - [https://medium.com/@lakshimi.cg/screenshot-prevention-in-ios-f059dc82b046](https://medium.com/@lakshimi.cg/screenshot-prevention-in-ios-f059dc82b046)

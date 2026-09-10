@@ -21,9 +21,21 @@ Replace standard `TextField` inputs for sensitive fields like Password with `Sec
 
 *Screenshot shows secret input being selected but the keyboard is not being shown due to the implementation of `SecureField`*
 
-<img src="attachments/feature4_risk1_control1_ss3.png" width="400" alt="Alt text">
+```swift
+SecureField("Password", text: $password)
+	.textContentType(.password)
+	.textInputAutocapitalization(.never)	
+	.autocorrectionDisabled()
 
-*Screenshot shows implementation of `SecureField`*
+SecureField("PIN", text: $pin)
+	.keyboardType(.numberPad)
+	.textContentType(.oneTimeCode)
+
+SecureField("API Key", text: $apiKey)
+	.textInputAutocapitalization(.never)
+	.autocorrectionDisabled()
+```
+*Code block shows implementation of `SecureField`*
 
 ### References
 

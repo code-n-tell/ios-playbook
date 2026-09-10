@@ -23,23 +23,23 @@ Download and install a keyboard app like `Gboard` on the iPhone. This provides t
 
 Go to `Settings > General > Keyboard > Keyboards > Add New Keyboard`, then tap \[Keyboard Name] under Third-Party Keyboards. This enables the keyboard for use in apps.
 
-<img src="attachments/feature5_ss2.png" width="400" alt="Alt text">
+<img src="attachments/feature4_ss2.png" width="400" alt="Alt text">
 
 *Screenshot shows step1 of adding a third-party keyboard*
 
-<img src="attachments/feature5_ss3.png" width="400" alt="Alt text">
+<img src="attachments/feature4_ss3.png" width="400" alt="Alt text">
 
 *Screenshot shows step2 of adding a third-party keyboard*
 
-<img src="attachments/feature5_ss4.png" width="400" alt="Alt text">
+<img src="attachments/feature4_ss4.png" width="400" alt="Alt text">
 
 *Screenshot shows step3 of adding a third-party keyboard*
 
-<img src="attachments/feature5_ss5.png" width="400" alt="Alt text">
+<img src="attachments/feature4_ss5.png" width="400" alt="Alt text">
 
 *Screenshot shows step4 of adding a third-party keyboard*
 
-<img src="attachments/feature5_ss6.png" width="400" alt="Alt text">
+<img src="attachments/feature4_ss6.png" width="400" alt="Alt text">
 
 *Screenshot shows step5 of adding a third-party keyboard*
 
@@ -47,11 +47,11 @@ Go to `Settings > General > Keyboard > Keyboards > Add New Keyboard`, then tap \
 
 In the Keyboards list, tap \[Keyboard Name], then enable Allow Full Access. This grants the permissions required for features such as custom themes and autocomplete.
 
-<img src="attachments/feature5_ss7.png" width="400" alt="Alt text">
+<img src="attachments/feature4_ss7.png" width="400" alt="Alt text">
 
 *Screenshot shows how to access custom keyboard permissions*
 
-<img src="attachments/feature5_ss8.png" width="400" alt="Alt text">
+<img src="attachments/feature4_ss8.png" width="400" alt="Alt text">
 
 *Screenshot shows enabling full access to custom keyboard*
 

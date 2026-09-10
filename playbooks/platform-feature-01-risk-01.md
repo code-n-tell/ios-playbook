@@ -6,7 +6,7 @@ Analyse the IPA
 
 ### Description
 
-Analyse the IPA using static analysis tools to identify sensitive plaintext information, such as hardcoded credentials, API keys, URLs, and configuration values (MITRE ATT&CK: TA0032).
+Analyse the IPA using static analysis tools to identify sensitive plaintext information, such as hardcoded credentials, API keys, URLs, and configuration values (MITRE ATT&CK: ***Discovery*** - TA0032).
 
 ### Demonstration
 

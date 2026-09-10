@@ -33,17 +33,24 @@ Set up the Swift Confidential build plugin in Xcode. This allows the plugin to a
 
 Move plaintext literals to `confidential.yml`. This allows the plugin to generate obfuscated Swift accessors for those literals during the build. Note: The `confidential.yml` file should not be built into the app bundle.
 
-<img src="attachments/feature1_risk1_control1_ss5.png" width="400" alt="Alt text">
+``` env
+secrets:
+	- name: apiKey
+	  value: verySecureApiKey
+```
 
-*Screenshot shows example contents of `confidential.yml`*
+*Code block shows example contents of `confidential.yml`*
 
 #### 03. Replace plaintext literals with references
 
 Replace plaintext literals with the generated Swift accessors. This ensures that the app references the obfuscated accessors instead of the original plaintext literals.
 
-<img src="attachments/feature1_risk1_control1_ss6.png" width="400" alt="Alt text">
+``` swift
+// Secrets is generated from confidential.yml by the Swift Confidential build plugin.
+let api_key = Secrets.$apiKey
+```
 
-*Screenshot shows accessing the `apiKey` defined in `confidential.yml` from the source code*
+*Code block shows accessing the `apiKey` defined in `confidential.yml` from the source code*
 
 #### 04. Verify plaintext literals are obfuscated
 
